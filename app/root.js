@@ -2,7 +2,7 @@ import React from 'react';
 import Header from './components/header';
 import Progress from './components/progress';
 
-
+let duration=null;
 let Root = React.createClass({
 	getInitialState() {
 		return {
@@ -22,10 +22,20 @@ let Root = React.createClass({
 			useStateClassSkin: true
 		});
 		$('#player').bind($.jPlayer.event.timeupdate, (e) => {
+			duration = e.jPlayer.status.duration;
 			this.setState({
-				progress: Math.round(e.jPlayer.status.currentTime)
-			});
+				progress: e.jPlayer.status.currentPercentAbsolute
+			});	//此处progress是100以内的数。	
 		});
+	},
+
+	componentWillUnMount() {
+		$('#player').unbind($.jPlayer.event.timeupdate);		
+	},
+
+	//此处的progress是大于0小于1的小数
+	progressChangeHandler(progressPercent){		
+		$('#player').jPlayer('play',duration * progressPercent);
 	},
 
 	render() {
@@ -34,6 +44,7 @@ let Root = React.createClass({
 				<Header/>
 				<Progress
 					progress={this.state.progress}	
+					onProgressChange={this.progressChangeHandler}
 				>
 				</Progress>
 			</div>
